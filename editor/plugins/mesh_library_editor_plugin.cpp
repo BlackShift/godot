@@ -63,15 +63,16 @@ void MeshLibraryEditor::_menu_remove_confirm() {
 	}
 }
 
-void MeshLibraryEditor::_menu_update_confirm(bool p_apply_xforms) {
+void MeshLibraryEditor::_menu_update_confirm(bool p_apply_xforms, bool p_apply_global_xforms) {
 	cd_update->hide();
 	apply_xforms = p_apply_xforms;
+	apply_global_xfroms = p_apply_global_xforms;
 	String existing = mesh_library->get_meta("_editor_source_scene");
 	ERR_FAIL_COND(existing.is_empty());
 	_import_scene_cbk(existing);
 }
 
-void MeshLibraryEditor::_import_scene(Node *p_scene, Ref<MeshLibrary> p_library, bool p_merge, bool p_apply_xforms) {
+void MeshLibraryEditor::_import_scene(Node *p_scene, Ref<MeshLibrary> p_library, bool p_merge, bool p_apply_xforms, bool p_apply_global_xforms) {
 	if (!p_merge) {
 		p_library->clear();
 	}
@@ -79,7 +80,7 @@ void MeshLibraryEditor::_import_scene(Node *p_scene, Ref<MeshLibrary> p_library,
 	HashMap<int, MeshInstance3D *> mesh_instances;
 
 	for (int i = 0; i < p_scene->get_child_count(); i++) {
-		_import_scene_parse_node(p_library, mesh_instances, p_scene->get_child(i), p_merge, p_apply_xforms);
+		_import_scene_parse_node(p_library, mesh_instances, p_scene->get_child(i), p_merge, p_apply_xforms, p_apply_global_xforms);
 	}
 
 	//generate previews!
@@ -113,7 +114,7 @@ void MeshLibraryEditor::_import_scene_cbk(const String &p_str) {
 
 	ERR_FAIL_NULL_MSG(scene, "Cannot create an instance from PackedScene '" + p_str + "'.");
 
-	_import_scene(scene, mesh_library, option == MENU_OPTION_UPDATE_FROM_SCENE, apply_xforms);
+	_import_scene(scene, mesh_library, option == MENU_OPTION_UPDATE_FROM_SCENE, apply_xforms, apply_global_xfroms);
 
 	memdelete(scene);
 	mesh_library->set_meta("_editor_source_scene", p_str);
@@ -121,13 +122,13 @@ void MeshLibraryEditor::_import_scene_cbk(const String &p_str) {
 	menu->get_popup()->set_item_disabled(menu->get_popup()->get_item_index(MENU_OPTION_UPDATE_FROM_SCENE), false);
 }
 
-void MeshLibraryEditor::_import_scene_parse_node(Ref<MeshLibrary> p_library, HashMap<int, MeshInstance3D *> &p_mesh_instances, Node *p_node, bool p_merge, bool p_apply_xforms) {
+void MeshLibraryEditor::_import_scene_parse_node(Ref<MeshLibrary> p_library, HashMap<int, MeshInstance3D *> &p_mesh_instances, Node *p_node, bool p_merge, bool p_apply_xforms, bool p_apply_global_xforms) {
 	MeshInstance3D *mesh_instance_node = Object::cast_to<MeshInstance3D>(p_node);
 
 	if (!mesh_instance_node) {
 		// No MeshInstance so search deeper ...
 		for (int i = 0; i < p_node->get_child_count(); i++) {
-			_import_scene_parse_node(p_library, p_mesh_instances, p_node->get_child(i), p_merge, p_apply_xforms);
+			_import_scene_parse_node(p_library, p_mesh_instances, p_node->get_child(i), p_merge, p_apply_xforms, p_apply_global_xforms);
 		}
 		return;
 	}
@@ -160,6 +161,10 @@ void MeshLibraryEditor::_import_scene_parse_node(Ref<MeshLibrary> p_library, Has
 	if (p_apply_xforms) {
 		item_mesh_transform = mesh_instance_node->get_transform();
 	}
+	if (p_apply_global_xforms) {
+		item_mesh_transform = mesh_instance_node->get_global_transform();
+	}
+
 	p_library->set_item_mesh_transform(item_id, item_mesh_transform);
 
 	Vector<MeshLibrary::ShapeData> collisions;
@@ -208,8 +213,8 @@ void MeshLibraryEditor::_import_scene_parse_node(Ref<MeshLibrary> p_library, Has
 	}
 }
 
-Error MeshLibraryEditor::update_library_file(Node *p_base_scene, Ref<MeshLibrary> ml, bool p_merge, bool p_apply_xforms) {
-	_import_scene(p_base_scene, ml, p_merge, p_apply_xforms);
+Error MeshLibraryEditor::update_library_file(Node *p_base_scene, Ref<MeshLibrary> ml, bool p_merge, bool p_apply_xforms, bool p_apply_global_xforms) {
+	_import_scene(p_base_scene, ml, p_merge, p_apply_xforms, p_apply_global_xforms);
 	return OK;
 }
 
@@ -235,6 +240,10 @@ void MeshLibraryEditor::_menu_cbk(int p_option) {
 			apply_xforms = true;
 			file->popup_file_dialog();
 		} break;
+		case MENU_OPTION_IMPORT_FROM_SCENE_APPLY_GLOBAL_XFORMS: {
+			apply_global_xfroms = true;
+			break;
+		}
 		case MENU_OPTION_UPDATE_FROM_SCENE: {
 			cd_update->set_text(vformat(TTR("Update from existing scene?:\n%s"), String(mesh_library->get_meta("_editor_source_scene"))));
 			cd_update->popup_centered(Size2(500, 60));
@@ -265,7 +274,8 @@ MeshLibraryEditor::MeshLibraryEditor() {
 	menu->get_popup()->add_item(TTR("Remove Selected Item"), MENU_OPTION_REMOVE_ITEM);
 	menu->get_popup()->add_separator();
 	menu->get_popup()->add_item(TTR("Import from Scene (Ignore Transforms)"), MENU_OPTION_IMPORT_FROM_SCENE);
-	menu->get_popup()->add_item(TTR("Import from Scene (Apply Transforms)"), MENU_OPTION_IMPORT_FROM_SCENE_APPLY_XFORMS);
+	menu->get_popup()->add_item(TTR("Import from Scene (Apply Local Transforms)"), MENU_OPTION_IMPORT_FROM_SCENE_APPLY_XFORMS);
+	menu->get_popup()->add_item(TTR("Import from Scene (Apply Global Transforms)"), MENU_OPTION_IMPORT_FROM_SCENE_APPLY_GLOBAL_XFORMS);
 	menu->get_popup()->add_item(TTR("Update from Scene"), MENU_OPTION_UPDATE_FROM_SCENE);
 	menu->get_popup()->set_item_disabled(menu->get_popup()->get_item_index(MENU_OPTION_UPDATE_FROM_SCENE), true);
 	menu->get_popup()->connect(SceneStringName(id_pressed), callable_mp(this, &MeshLibraryEditor::_menu_cbk));

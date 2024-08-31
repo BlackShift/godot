@@ -49,6 +49,7 @@ class MeshLibraryEditor : public Control {
 	ConfirmationDialog *cd_update = nullptr;
 	EditorFileDialog *file = nullptr;
 	bool apply_xforms = false;
+	bool apply_global_xfroms = false;
 	int to_erase = 0;
 
 	enum {
@@ -56,23 +57,24 @@ class MeshLibraryEditor : public Control {
 		MENU_OPTION_REMOVE_ITEM,
 		MENU_OPTION_UPDATE_FROM_SCENE,
 		MENU_OPTION_IMPORT_FROM_SCENE,
-		MENU_OPTION_IMPORT_FROM_SCENE_APPLY_XFORMS
+		MENU_OPTION_IMPORT_FROM_SCENE_APPLY_XFORMS,
+		MENU_OPTION_IMPORT_FROM_SCENE_APPLY_GLOBAL_XFORMS,
 	};
 
 	int option = 0;
 	void _import_scene_cbk(const String &p_str);
 	void _menu_cbk(int p_option);
 	void _menu_remove_confirm();
-	void _menu_update_confirm(bool p_apply_xforms);
+	void _menu_update_confirm(bool p_apply_xforms, bool p_apply_global_xforms);
 
-	static void _import_scene(Node *p_scene, Ref<MeshLibrary> p_library, bool p_merge, bool p_apply_xforms);
-	static void _import_scene_parse_node(Ref<MeshLibrary> p_library, HashMap<int, MeshInstance3D *> &p_mesh_instances, Node *p_node, bool p_merge, bool p_apply_xforms);
+	static void _import_scene(Node *p_scene, Ref<MeshLibrary> p_library, bool p_merge, bool p_apply_xforms, bool p_apply_global_xforms);
+	static void _import_scene_parse_node(Ref<MeshLibrary> p_library, HashMap<int, MeshInstance3D *> &p_mesh_instances, Node *p_node, bool p_merge, bool p_apply_xforms, bool p_apply_global_xforms);
 
 public:
 	MenuButton *get_menu_button() const { return menu; }
 
 	void edit(const Ref<MeshLibrary> &p_mesh_library);
-	static Error update_library_file(Node *p_base_scene, Ref<MeshLibrary> ml, bool p_merge = true, bool p_apply_xforms = false);
+	static Error update_library_file(Node *p_base_scene, Ref<MeshLibrary> ml, bool p_merge = true, bool p_apply_xforms = false, bool p_apply_global_xforms = false);
 
 	MeshLibraryEditor();
 };

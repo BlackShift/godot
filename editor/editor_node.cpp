@@ -2176,6 +2176,7 @@ void EditorNode::_dialog_action(String p_file) {
 			const Dictionary &fd_options = file_export_lib->get_selected_options();
 			bool merge_with_existing_library = fd_options.get(TTR("Merge With Existing"), true);
 			bool apply_mesh_instance_transforms = fd_options.get(TTR("Apply MeshInstance Transforms"), false);
+			bool apply_mesh_instance_global_transforms = fd_options.get(TTR("Apply MeshInstance Global Transform"), false);
 
 			Ref<MeshLibrary> ml;
 			if (merge_with_existing_library && FileAccess::exists(p_file)) {
@@ -2191,7 +2192,7 @@ void EditorNode::_dialog_action(String p_file) {
 				ml = Ref<MeshLibrary>(memnew(MeshLibrary));
 			}
 
-			MeshLibraryEditor::update_library_file(editor_data.get_edited_scene_root(), ml, merge_with_existing_library, apply_mesh_instance_transforms);
+			MeshLibraryEditor::update_library_file(editor_data.get_edited_scene_root(), ml, merge_with_existing_library, apply_mesh_instance_transforms,apply_mesh_instance_global_transforms);
 
 			Error err = ResourceSaver::save(ml, p_file);
 			if (err) {
@@ -7653,6 +7654,7 @@ EditorNode::EditorNode() {
 	file_export_lib->connect("file_selected", callable_mp(this, &EditorNode::_dialog_action));
 	file_export_lib->add_option(TTR("Merge With Existing"), Vector<String>(), true);
 	file_export_lib->add_option(TTR("Apply MeshInstance Transforms"), Vector<String>(), false);
+	file_export_lib->add_option(TTR("Apply MeshInstance Global Transform"), Vector<String>(), false);
 	gui_base->add_child(file_export_lib);
 
 	file_script = memnew(EditorFileDialog);
