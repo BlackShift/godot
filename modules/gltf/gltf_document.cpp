@@ -5995,11 +5995,11 @@ void GLTFDocument::_convert_grid_map_to_gltf(GridMap *p_grid_map, GLTFNodeIndex 
 		p_state->nodes.push_back(new_gltf_node);
 		Vector3 cell_location = cells[k];
 		int32_t cell = p_grid_map->get_cell_item(
-				Vector3(cell_location.x, cell_location.y, cell_location.z));
+				Vector4i(cell_location.x, cell_location.y, cell_location.z,0));
 		Transform3D cell_xform;
 		cell_xform.basis = p_grid_map->get_basis_with_orthogonal_index(
 				p_grid_map->get_cell_item_orientation(
-						Vector3(cell_location.x, cell_location.y, cell_location.z)));
+						Vector4i(cell_location.x, cell_location.y, cell_location.z,0)));
 		cell_xform.basis.scale(Vector3(p_grid_map->get_cell_scale(),
 				p_grid_map->get_cell_scale(),
 				p_grid_map->get_cell_scale()));

@@ -55,6 +55,7 @@ class GridMap : public Node3D {
 			int16_t x;
 			int16_t y;
 			int16_t z;
+			int16_t l;
 		};
 		uint64_t key = 0;
 
@@ -68,14 +69,15 @@ class GridMap : public Node3D {
 			return key == p_key.key;
 		}
 
-		_FORCE_INLINE_ operator Vector3i() const {
-			return Vector3i(x, y, z);
+		_FORCE_INLINE_ operator Vector4i() const {
+			return Vector4i(x, y, z, l);
 		}
 
-		IndexKey(Vector3i p_vector) {
+		IndexKey(Vector4i p_vector) {
 			x = (int16_t)p_vector.x;
 			y = (int16_t)p_vector.y;
 			z = (int16_t)p_vector.z;
+			l = (int16_t)p_vector.w;
 		}
 		IndexKey() {}
 	};
@@ -174,6 +176,7 @@ class GridMap : public Node3D {
 
 	HashMap<OctantKey, Octant *, OctantKey> octant_map;
 	HashMap<IndexKey, Cell, IndexKey> cell_map;
+	HashMap<IndexKey, Vector4, IndexKey> custom_data_map;
 
 	void _recreate_octant_data();
 
@@ -276,10 +279,12 @@ public:
 	void set_center_z(bool p_enable);
 	bool get_center_z() const;
 
-	void set_cell_item(const Vector3i &p_position, int p_item, int p_rot = 0);
-	int get_cell_item(const Vector3i &p_position) const;
-	int get_cell_item_orientation(const Vector3i &p_position) const;
-	Basis get_cell_item_basis(const Vector3i &p_position) const;
+	void set_cell_custom_data(const Vector4i &p_position,const Vector4 &p_custom_data);
+	Vector4 get_cell_custom_data(const Vector4i &p_position) const;
+	void set_cell_item(const Vector4i &p_position, int p_item, int p_rot = 0);
+	int get_cell_item(const Vector4i &p_position) const;
+	int get_cell_item_orientation(const Vector4i &p_position) const;
+	Basis get_cell_item_basis(const Vector4i &p_position) const;
 	Basis get_basis_with_orthogonal_index(int p_index) const;
 	int get_orthogonal_index_from_basis(const Basis &p_basis) const;
 
@@ -289,8 +294,8 @@ public:
 	void set_cell_scale(float p_scale);
 	float get_cell_scale() const;
 
-	TypedArray<Vector3i> get_used_cells() const;
-	TypedArray<Vector3i> get_used_cells_by_item(int p_item) const;
+	TypedArray<Vector4i> get_used_cells() const;
+	TypedArray<Vector4i> get_used_cells_by_item(int p_item) const;
 
 	Array get_meshes() const;
 

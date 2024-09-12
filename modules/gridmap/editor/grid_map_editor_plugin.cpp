@@ -466,7 +466,7 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 
 		return true;
 	} else if (input_action == INPUT_PICK) {
-		int item = node->get_cell_item(Vector3i(cell[0], cell[1], cell[2]));
+		int item = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2],0));
 		if (item >= 0) {
 			selected_palette = item;
 
@@ -489,20 +489,20 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 		si.position = Vector3i(cell[0], cell[1], cell[2]);
 		si.new_value = selected_palette;
 		si.new_orientation = cursor_rot;
-		si.old_value = node->get_cell_item(Vector3i(cell[0], cell[1], cell[2]));
-		si.old_orientation = node->get_cell_item_orientation(Vector3i(cell[0], cell[1], cell[2]));
+		si.old_value = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2],0));
+		si.old_orientation = node->get_cell_item_orientation(Vector4i(cell[0], cell[1], cell[2],0));
 		set_items.push_back(si);
-		node->set_cell_item(Vector3i(cell[0], cell[1], cell[2]), selected_palette, cursor_rot);
+		node->set_cell_item(Vector4i(cell[0], cell[1], cell[2],0), selected_palette, cursor_rot);
 		return true;
 	} else if (input_action == INPUT_ERASE) {
 		SetItem si;
 		si.position = Vector3i(cell[0], cell[1], cell[2]);
 		si.new_value = -1;
 		si.new_orientation = 0;
-		si.old_value = node->get_cell_item(Vector3i(cell[0], cell[1], cell[2]));
-		si.old_orientation = node->get_cell_item_orientation(Vector3i(cell[0], cell[1], cell[2]));
+		si.old_value = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2],0));
+		si.old_orientation = node->get_cell_item_orientation(Vector4i(cell[0], cell[1], cell[2], 0));
 		set_items.push_back(si);
-		node->set_cell_item(Vector3i(cell[0], cell[1], cell[2]), -1);
+		node->set_cell_item(Vector4i(cell[0], cell[1], cell[2], 0), -1);
 		return true;
 	}
 
@@ -519,7 +519,7 @@ void GridMapEditor::_delete_selection() {
 	for (int i = selection.begin.x; i <= selection.end.x; i++) {
 		for (int j = selection.begin.y; j <= selection.end.y; j++) {
 			for (int k = selection.begin.z; k <= selection.end.z; k++) {
-				Vector3i selected = Vector3i(i, j, k);
+				Vector4i selected = Vector4i(i, j, k,0);
 				undo_redo->add_do_method(node, "set_cell_item", selected, GridMap::INVALID_CELL_ITEM);
 				undo_redo->add_undo_method(node, "set_cell_item", selected, node->get_cell_item(selected), node->get_cell_item_orientation(selected));
 			}
@@ -540,7 +540,7 @@ void GridMapEditor::_fill_selection() {
 	for (int i = selection.begin.x; i <= selection.end.x; i++) {
 		for (int j = selection.begin.y; j <= selection.end.y; j++) {
 			for (int k = selection.begin.z; k <= selection.end.z; k++) {
-				Vector3i selected = Vector3i(i, j, k);
+				Vector4i selected = Vector4i(i, j, k, 0);
 				undo_redo->add_do_method(node, "set_cell_item", selected, selected_palette, cursor_rot);
 				undo_redo->add_undo_method(node, "set_cell_item", selected, node->get_cell_item(selected), node->get_cell_item_orientation(selected));
 			}
@@ -567,7 +567,7 @@ void GridMapEditor::_set_clipboard_data() {
 	for (int i = selection.begin.x; i <= selection.end.x; i++) {
 		for (int j = selection.begin.y; j <= selection.end.y; j++) {
 			for (int k = selection.begin.z; k <= selection.end.z; k++) {
-				Vector3i selected = Vector3i(i, j, k);
+				Vector4i selected = Vector4i(i, j, k, 0);
 				int itm = node->get_cell_item(selected);
 				if (itm == GridMap::INVALID_CELL_ITEM) {
 					continue;
@@ -577,7 +577,7 @@ void GridMapEditor::_set_clipboard_data() {
 
 				ClipboardItem item;
 				item.cell_item = itm;
-				item.grid_offset = Vector3(selected) - selection.begin;
+				item.grid_offset = Vector3(selected.x,selected.y,selected.z) - selection.begin;
 				item.orientation = node->get_cell_item_orientation(selected);
 				item.instance = RenderingServer::get_singleton()->instance_create2(mesh->get_rid(), get_tree()->get_root()->get_world_3d()->get_scenario());
 
@@ -640,7 +640,7 @@ void GridMapEditor::_do_paste() {
 		orm = rot * orm;
 
 		undo_redo->add_do_method(node, "set_cell_item", position, item.cell_item, node->get_orthogonal_index_from_basis(orm));
-		undo_redo->add_undo_method(node, "set_cell_item", position, node->get_cell_item(position), node->get_cell_item_orientation(position));
+		undo_redo->add_undo_method(node, "set_cell_item", position, node->get_cell_item(Vector4i(position.x, position.y, position.z, 0.0)), node->get_cell_item_orientation(Vector4i(position.x, position.y, position.z, 0.0)));
 	}
 
 	if (reselect) {
