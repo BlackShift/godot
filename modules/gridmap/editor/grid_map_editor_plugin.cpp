@@ -76,6 +76,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			}
 		} break;
 
+		case MENU_OPTION_NEXT_LAYER: {
+			layer->set_value(layer->get_value() + 1);
+		} break;
+
+		case MENU_OPTION_PREV_LAYER: {
+			layer->set_value(layer->get_value() - 1);
+		} break;
+
 		case MENU_OPTION_X_AXIS:
 		case MENU_OPTION_Y_AXIS:
 		case MENU_OPTION_Z_AXIS: {
@@ -420,7 +428,7 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 		}
 	}
 
-	int cell[3];
+	int cell[4];
 	Vector3 cell_size = node->get_cell_size();
 
 	for (int i = 0; i < 3; i++) {
@@ -434,6 +442,7 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 			grid_ofs[i] = cell[i] * cell_size[i];
 		}
 	}
+	cell[3] = edit_floor[3];
 
 	RS::get_singleton()->instance_set_transform(grid_instance[edit_axis], node->get_global_transform() * edit_grid_xform);
 
@@ -466,7 +475,7 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 
 		return true;
 	} else if (input_action == INPUT_PICK) {
-		int item = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2],0));
+		int item = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2], cell[3]));
 		if (item >= 0) {
 			selected_palette = item;
 
@@ -486,23 +495,23 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 
 	if (input_action == INPUT_PAINT) {
 		SetItem si;
-		si.position = Vector3i(cell[0], cell[1], cell[2]);
+		si.position = Vector4i(cell[0], cell[1], cell[2], cell[3]);
 		si.new_value = selected_palette;
 		si.new_orientation = cursor_rot;
-		si.old_value = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2],0));
-		si.old_orientation = node->get_cell_item_orientation(Vector4i(cell[0], cell[1], cell[2],0));
+		si.old_value = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2], cell[3]));
+		si.old_orientation = node->get_cell_item_orientation(Vector4i(cell[0], cell[1], cell[2], cell[3]));
 		set_items.push_back(si);
 		node->set_cell_item(Vector4i(cell[0], cell[1], cell[2],0), selected_palette, cursor_rot);
 		return true;
 	} else if (input_action == INPUT_ERASE) {
 		SetItem si;
-		si.position = Vector3i(cell[0], cell[1], cell[2]);
+		si.position = Vector4i(cell[0], cell[1], cell[2], cell[3]);
 		si.new_value = -1;
 		si.new_orientation = 0;
-		si.old_value = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2],0));
-		si.old_orientation = node->get_cell_item_orientation(Vector4i(cell[0], cell[1], cell[2], 0));
+		si.old_value = node->get_cell_item(Vector4i(cell[0], cell[1], cell[2], cell[3]));
+		si.old_orientation = node->get_cell_item_orientation(Vector4i(cell[0], cell[1], cell[2], cell[3]));
 		set_items.push_back(si);
-		node->set_cell_item(Vector4i(cell[0], cell[1], cell[2], 0), -1);
+		node->set_cell_item(Vector4i(cell[0], cell[1], cell[2], cell[3]), -1);
 		return true;
 	}
 
@@ -1326,12 +1335,25 @@ void GridMapEditor::_floor_mouse_exited() {
 	floor->get_line_edit()->release_focus();
 }
 
+void GridMapEditor::_layer_changed(float p_value) {
+	if (updating) {
+		return;
+	}
+
+	edit_floor[3] = p_value;
+}
+
+void GridMapEditor::_layer_mouse_exited() {
+	layer->get_line_edit()->release_focus();
+}
+
 void GridMapEditor::_bind_methods() {
 	ClassDB::bind_method("_configure", &GridMapEditor::_configure);
 	ClassDB::bind_method("_set_selection", &GridMapEditor::_set_selection);
 }
 
 GridMapEditor::GridMapEditor() {
+<<<<<<< HEAD
 	ED_SHORTCUT("grid_map/previous_floor", TTRC("Previous Floor"), Key::KEY_1, true);
 	ED_SHORTCUT("grid_map/next_floor", TTRC("Next Floor"), Key::KEY_3, true);
 	ED_SHORTCUT("grid_map/edit_x_axis", TTRC("Edit X Axis"), KeyModifierMask::SHIFT + Key::Z, true);
@@ -1339,9 +1361,37 @@ GridMapEditor::GridMapEditor() {
 	ED_SHORTCUT("grid_map/edit_z_axis", TTRC("Edit Z Axis"), KeyModifierMask::SHIFT + Key::C, true);
 	ED_SHORTCUT("grid_map/keep_selected", TTRC("Keep Selection"));
 	ED_SHORTCUT("grid_map/clear_rotation", TTRC("Clear Rotation"));
+=======
+	ED_SHORTCUT("grid_map/previous_floor", TTR("Previous Floor"), Key::KEY_1, true);
+	ED_SHORTCUT("grid_map/next_floor", TTR("Next Floor"), Key::KEY_3, true);
+	ED_SHORTCUT("grid_map/next_layer", TTR("Previous Layer"), KeyModifierMask::SHIFT + Key::Q, true);
+	ED_SHORTCUT("grid_map/previous_layer", TTR("Next Layer"), KeyModifierMask::SHIFT + Key::E, true);
+	ED_SHORTCUT("grid_map/edit_x_axis", TTR("Edit X Axis"), KeyModifierMask::SHIFT + Key::Z, true);
+	ED_SHORTCUT("grid_map/edit_y_axis", TTR("Edit Y Axis"), KeyModifierMask::SHIFT + Key::X, true);
+	ED_SHORTCUT("grid_map/edit_z_axis", TTR("Edit Z Axis"), KeyModifierMask::SHIFT + Key::C, true);
+	ED_SHORTCUT("grid_map/keep_selected", TTR("Keep Selection"));
+	ED_SHORTCUT("grid_map/clear_rotation", TTR("Clear Rotation"));
+>>>>>>> 583b6fe2bb (Allow editing layers in GridMapEditor)
+
+	//layer_spin_box_label = memnew(Label);
+	//layer_spin_box_label->set_text(TTR("Layer:"));
+	//spatial_editor_hb->add_child(layer_spin_box_label);
+
+	//layer = memnew(SpinBox);
+	//layer->set_min(-32767);
+	//layer->set_max(32767);
+	//layer->set_step(1);
+	//layer->get_line_edit()->add_theme_constant_override("minimum_character_width", 16);
+
+	//spatial_editor_hb->add_child(layer);
+	//layer->connect(SceneStringName(value_changed), callable_mp(this, &GridMapEditor::_layer_changed));
+	//layer->connect(SceneStringName(mouse_exited), callable_mp(this, &GridMapEditor::_layer_mouse_exited));
 
 	options = memnew(MenuButton);
 	options->set_theme_type_variation(SceneStringName(FlatButton));
+	options->get_popup()->add_separator();
+	options->get_popup()->add_shortcut(ED_GET_SHORTCUT("grid_map/previous_layer"), MENU_OPTION_PREV_LAYER);
+	options->get_popup()->add_shortcut(ED_GET_SHORTCUT("grid_map/next_layer"), MENU_OPTION_NEXT_LAYER);
 	options->get_popup()->add_separator();
 	options->get_popup()->add_radio_check_shortcut(ED_GET_SHORTCUT("grid_map/edit_x_axis"), MENU_OPTION_X_AXIS);
 	options->get_popup()->add_radio_check_shortcut(ED_GET_SHORTCUT("grid_map/edit_y_axis"), MENU_OPTION_Y_AXIS);
@@ -1571,6 +1621,7 @@ GridMapEditor::GridMapEditor() {
 	edit_floor[0] = -1;
 	edit_floor[1] = -1;
 	edit_floor[2] = -1;
+	edit_floor[3] = -1;
 
 	cursor_mesh = RenderingServer::get_singleton()->mesh_create();
 	selection_mesh = RenderingServer::get_singleton()->mesh_create();
