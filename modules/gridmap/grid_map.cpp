@@ -1040,6 +1040,7 @@ void GridMap::_queue_octants_dirty() {
 	}
 
 	callable_mp(this, &GridMap::_update_octants_callback).call_deferred();
+	
 	awaiting_update = true;
 }
 
@@ -1097,6 +1098,7 @@ void GridMap::_update_octants_callback() {
 
 	_update_visibility();
 	awaiting_update = false;
+	emit_signal(SNAME("grid_map_changed"));
 }
 
 void GridMap::_bind_methods() {
@@ -1191,6 +1193,7 @@ void GridMap::_bind_methods() {
 	BIND_CONSTANT(INVALID_CELL_ITEM);
 
 	ADD_SIGNAL(MethodInfo("cell_size_changed", PropertyInfo(Variant::VECTOR3, "cell_size")));
+	ADD_SIGNAL(MethodInfo("grid_map_changed"));
 	ADD_SIGNAL(MethodInfo(CoreStringName(changed)));
 }
 
