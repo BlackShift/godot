@@ -70,6 +70,7 @@ class GridMapEditor : public VBoxContainer {
 	Panel *panel = nullptr;
 	MenuButton *options = nullptr;
 	SpinBox *floor = nullptr;
+	SpinBox *layer = nullptr;
 	double accumulated_floor_delta = 0.0;
 	Button *mode_thumbnail = nullptr;
 	Button *mode_list = nullptr;
@@ -80,9 +81,10 @@ class GridMapEditor : public VBoxContainer {
 	VBoxContainer *settings_vbc = nullptr;
 	SpinBox *settings_pick_distance = nullptr;
 	Label *spin_box_label = nullptr;
+	Label *layer_spin_box_label = nullptr;
 
 	struct SetItem {
-		Vector3i position;
+		Vector4i position;
 		int new_value = 0;
 		int new_orientation = 0;
 		int old_value = 0;
@@ -97,7 +99,7 @@ class GridMapEditor : public VBoxContainer {
 	Transform3D grid_xform;
 	Transform3D edit_grid_xform;
 	Vector3::Axis edit_axis;
-	int edit_floor[3];
+	int edit_floor[4];
 	Vector3 grid_ofs;
 
 	RID grid[3];
@@ -172,7 +174,10 @@ class GridMapEditor : public VBoxContainer {
 		MENU_OPTION_SELECTION_CUT,
 		MENU_OPTION_SELECTION_CLEAR,
 		MENU_OPTION_SELECTION_FILL,
-		MENU_OPTION_GRIDMAP_SETTINGS
+		MENU_OPTION_NEXT_LAYER,
+		MENU_OPTION_PREV_LAYER,
+		MENU_OPTION_GRIDMAP_SETTINGS,
+		
 
 	};
 
@@ -214,6 +219,9 @@ class GridMapEditor : public VBoxContainer {
 
 	void _floor_changed(float p_value);
 	void _floor_mouse_exited();
+
+	void _layer_changed(float p_value);
+	void _layer_mouse_exited();
 
 	void _delete_selection();
 	void _fill_selection();
