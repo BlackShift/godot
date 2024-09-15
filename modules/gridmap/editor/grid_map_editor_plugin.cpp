@@ -360,6 +360,10 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 		return false;
 	}
 
+	if (node->get_meta("disable_gridmap_edit", false)) {
+		return false;
+	}
+
 	if (selected_palette < 0 && input_action != INPUT_PICK && input_action != INPUT_SELECT && input_action != INPUT_PASTE) {
 		return false;
 	}
@@ -973,8 +977,19 @@ void GridMapEditor::edit(GridMap *p_gridmap) {
 	_update_paste_indicator();
 
 	spatial_editor = Object::cast_to<Node3DEditorPlugin>(EditorNode::get_singleton()->get_editor_main_screen()->get_selected_plugin());
-
 	if (!node) {
+		set_process(false);
+		for (int i = 0; i < 3; i++) {
+			RenderingServer::get_singleton()->instance_set_visible(grid_instance[i], false);
+		}
+
+		if (cursor_instance.is_valid()) {
+			RenderingServer::get_singleton()->instance_set_visible(cursor_instance, false);
+		}
+
+		return;
+	}
+	if (node->get_meta("disable_gridmap_edit", false)) {
 		set_process(false);
 		for (int i = 0; i < 3; i++) {
 			RenderingServer::get_singleton()->instance_set_visible(grid_instance[i], false);
