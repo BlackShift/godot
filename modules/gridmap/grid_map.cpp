@@ -352,6 +352,40 @@ bool GridMap::get_center_z() const {
 	return center_z;
 }
 
+void GridMap::set_layer_mask(uint32_t p_mask) {
+	if (p_mask != layers) {
+		for (const KeyValue<OctantKey, Octant *> &e : octant_map) {
+			for (int i = 0; i < e.value->multimesh_instances.size(); i++) {
+				RS::get_singleton()->instance_set_layer_mask(e.value->multimesh_instances[i].instance, p_mask);
+			}
+		}
+	}
+	layers = p_mask;
+}
+
+uint32_t GridMap::get_layer_mask() const {
+	return layers;
+}
+
+void GridMap::set_cast_shadows_setting(ShadowCastingSetting p_shadow_casting_setting) {
+	if (p_shadow_casting_setting != shadow_casting_setting) {
+		for (const KeyValue<OctantKey, Octant *> &e : octant_map) {
+			for (int i = 0; i < e.value->multimesh_instances.size(); i++) {
+				RS::get_singleton()->instance_geometry_set_cast_shadows_setting(e.value->multimesh_instances[i].instance,
+																	(RS::ShadowCastingSetting) p_shadow_casting_setting);
+			}
+		}
+	}
+	shadow_casting_setting = p_shadow_casting_setting;
+
+	//RS::get_singleton()->instance_geometry_set_cast_shadows_setting(get_instance(), (RS::ShadowCastingSetting)p_shadow_casting_setting);
+}
+
+GridMap::ShadowCastingSetting GridMap::get_cast_shadows_setting() const {
+	return shadow_casting_setting;
+}
+
+
 void GridMap::set_cell_custom_data(const Vector4i& p_position, const Vector4& p_custom_data) {
 	IndexKey key;
 	key.x = p_position.x;
@@ -778,6 +812,8 @@ bool GridMap::_octant_update(const OctantKey &p_key) {
 			if (is_inside_tree()) {
 				RS::get_singleton()->instance_set_scenario(instance, get_world_3d()->get_scenario());
 				RS::get_singleton()->instance_set_transform(instance, get_global_transform());
+				RS::get_singleton()->instance_set_layer_mask(instance, layers);
+				RS::get_singleton()->instance_geometry_set_cast_shadows_setting(instance, (RS::ShadowCastingSetting)shadow_casting_setting);
 			}
 
 			RS::ShadowCastingSetting cast_shadows = (RS::ShadowCastingSetting)mesh_library->get_item_mesh_cast_shadow(E.key);
@@ -1132,6 +1168,12 @@ void GridMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_collision_priority", "priority"), &GridMap::set_collision_priority);
 	ClassDB::bind_method(D_METHOD("get_collision_priority"), &GridMap::get_collision_priority);
 
+	ClassDB::bind_method(D_METHOD("set_layer_mask", "mask"), &GridMap::set_layer_mask);
+	ClassDB::bind_method(D_METHOD("get_layer_mask"), &GridMap::get_layer_mask);
+
+	ClassDB::bind_method(D_METHOD("set_cast_shadows_setting", "shadow_casting_setting"), &GridMap::set_cast_shadows_setting);
+	ClassDB::bind_method(D_METHOD("get_cast_shadows_setting"), &GridMap::get_cast_shadows_setting);
+
 	ClassDB::bind_method(D_METHOD("set_physics_material", "material"), &GridMap::set_physics_material);
 	ClassDB::bind_method(D_METHOD("get_physics_material"), &GridMap::get_physics_material);
 
@@ -1191,6 +1233,8 @@ void GridMap::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "mesh_library", PROPERTY_HINT_RESOURCE_TYPE, "MeshLibrary"), "set_mesh_library", "get_mesh_library");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "physics_material", PROPERTY_HINT_RESOURCE_TYPE, "PhysicsMaterial"), "set_physics_material", "get_physics_material");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "layers", PROPERTY_HINT_LAYERS_3D_RENDER), "set_layer_mask", "get_layer_mask");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "cast_shadow", PROPERTY_HINT_ENUM, "Off,On,Double-Sided,Shadows Only"), "set_cast_shadows_setting", "get_cast_shadows_setting");
 	ADD_GROUP("Cell", "cell_");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "cell_size", PROPERTY_HINT_NONE, "suffix:m"), "set_cell_size", "get_cell_size");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "cell_octant_size", PROPERTY_HINT_RANGE, "1,1024,1"), "set_octant_size", "get_octant_size");
@@ -1206,6 +1250,11 @@ void GridMap::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bake_navigation"), "set_bake_navigation", "is_baking_navigation");
 
 	BIND_CONSTANT(INVALID_CELL_ITEM);
+
+	BIND_ENUM_CONSTANT(SHADOW_CASTING_SETTING_OFF);
+	BIND_ENUM_CONSTANT(SHADOW_CASTING_SETTING_ON);
+	BIND_ENUM_CONSTANT(SHADOW_CASTING_SETTING_DOUBLE_SIDED);
+	BIND_ENUM_CONSTANT(SHADOW_CASTING_SETTING_SHADOWS_ONLY);
 
 	ADD_SIGNAL(MethodInfo("cell_size_changed", PropertyInfo(Variant::VECTOR3, "cell_size")));
 	ADD_SIGNAL(MethodInfo("grid_map_changed"));

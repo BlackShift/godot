@@ -45,6 +45,15 @@ class PhysicsMaterial;
 class GridMap : public Node3D {
 	GDCLASS(GridMap, Node3D);
 
+public:
+	enum ShadowCastingSetting {
+		SHADOW_CASTING_SETTING_OFF = RS::SHADOW_CASTING_SETTING_OFF,
+		SHADOW_CASTING_SETTING_ON = RS::SHADOW_CASTING_SETTING_ON,
+		SHADOW_CASTING_SETTING_DOUBLE_SIDED = RS::SHADOW_CASTING_SETTING_DOUBLE_SIDED,
+		SHADOW_CASTING_SETTING_SHADOWS_ONLY = RS::SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	};
+
+private:
 	enum {
 		MAP_DIRTY_TRANSFORMS = 1,
 		MAP_DIRTY_INSTANCES = 2,
@@ -152,7 +161,8 @@ class GridMap : public Node3D {
 		//OctantKey(const IndexKey& p_k, int p_item) { indexkey=p_k.key; item=p_item; }
 		OctantKey() {}
 	};
-
+	uint32_t layers = 1;
+	ShadowCastingSetting shadow_casting_setting = SHADOW_CASTING_SETTING_ON;
 	uint32_t collision_layer = 1;
 	uint32_t collision_mask = 1;
 	real_t collision_priority = 1.0;
@@ -237,6 +247,9 @@ public:
 		INVALID_CELL_ITEM = -1
 	};
 
+	void set_cast_shadows_setting(ShadowCastingSetting p_shadow_casting_setting);
+	ShadowCastingSetting get_cast_shadows_setting() const;
+
 	void set_collision_layer(uint32_t p_layer);
 	uint32_t get_collision_layer() const;
 
@@ -279,6 +292,9 @@ public:
 	void set_center_z(bool p_enable);
 	bool get_center_z() const;
 
+	void set_layer_mask(uint32_t p_mask);
+	uint32_t get_layer_mask() const;
+
 	void set_cell_custom_data(const Vector4i &p_position,const Vector4 &p_custom_data);
 	Vector4 get_cell_custom_data(const Vector4i &p_position) const;
 	void set_cell_item(const Vector4i &p_position, int p_item, int p_rot = 0);
@@ -318,5 +334,7 @@ public:
 	GridMap();
 	~GridMap();
 };
+
+VARIANT_ENUM_CAST(GridMap::ShadowCastingSetting);
 
 #endif // GRID_MAP_H
