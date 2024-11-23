@@ -393,19 +393,10 @@ bool GridMapEditor::do_input_action(Camera3D *p_camera, const Point2 &p_point, b
 	if (!spatial_editor) {
 		return false;
 	}
-<<<<<<< HEAD
 	if (input_action == INPUT_TRANSFORM) {
 		return false;
 	}
 	if (selected_palette < 0 && input_action != INPUT_NONE && input_action != INPUT_PICK && input_action != INPUT_SELECT && input_action != INPUT_PASTE) {
-=======
-
-	if (node->get_meta("disable_gridmap_edit", false)) {
-		return false;
-	}
-
-	if (selected_palette < 0 && input_action != INPUT_PICK && input_action != INPUT_SELECT && input_action != INPUT_PASTE) {
->>>>>>> 78cfe9d3ad (Allow disabling by using "disable_gridmap_edit")
 		return false;
 	}
 	if (mesh_library.is_null()) {
@@ -1397,20 +1388,6 @@ GridMapEditor::GridMapEditor() {
 	ED_SHORTCUT("grid_map/clear_rotation", TTR("Clear Rotation"));
 >>>>>>> 583b6fe2bb (Allow editing layers in GridMapEditor)
 
-	//layer_spin_box_label = memnew(Label);
-	//layer_spin_box_label->set_text(TTR("Layer:"));
-	//spatial_editor_hb->add_child(layer_spin_box_label);
-
-	//layer = memnew(SpinBox);
-	//layer->set_min(-32767);
-	//layer->set_max(32767);
-	//layer->set_step(1);
-	//layer->get_line_edit()->add_theme_constant_override("minimum_character_width", 16);
-
-	//spatial_editor_hb->add_child(layer);
-	//layer->connect(SceneStringName(value_changed), callable_mp(this, &GridMapEditor::_layer_changed));
-	//layer->connect(SceneStringName(mouse_exited), callable_mp(this, &GridMapEditor::_layer_mouse_exited));
-
 	options = memnew(MenuButton);
 	options->set_theme_type_variation(SceneStringName(FlatButton));
 	options->get_popup()->add_separator();
@@ -1593,6 +1570,21 @@ GridMapEditor::GridMapEditor() {
 	floor->connect(SceneStringName(value_changed), callable_mp(this, &GridMapEditor::_floor_changed));
 	floor->connect(SceneStringName(mouse_exited), callable_mp(this, &GridMapEditor::_floor_mouse_exited));
 	floor->get_line_edit()->connect(SceneStringName(mouse_exited), callable_mp(this, &GridMapEditor::_floor_mouse_exited));
+
+	layer_spin_box_label = memnew(Label);
+	layer_spin_box_label->set_text(TTR("Layer:"));
+	toolbar->add_child(layer_spin_box_label);
+
+
+	layer = memnew(SpinBox);
+	layer->set_min(-32767);
+	layer->set_max(32767);
+	layer->set_step(1);
+	layer->get_line_edit()->add_theme_constant_override("minimum_character_width", 16);
+	toolbar->add_child(layer);
+	
+	layer->connect(SceneStringName(value_changed), callable_mp(this, &GridMapEditor::_layer_changed));
+	layer->connect(SceneStringName(mouse_exited), callable_mp(this, &GridMapEditor::_layer_mouse_exited));
 
 	search_box = memnew(LineEdit);
 	search_box->add_theme_constant_override("minimum_character_width", 10);
