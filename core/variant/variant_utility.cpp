@@ -1234,6 +1234,21 @@ bool VariantUtilityFunctions::is_same(const Variant &p_a, const Variant &p_b) {
 	return p_a.identity_compare(p_b);
 }
 
+PackedVector3Array VariantUtilityFunctions::decode_vec3in4(const PackedByteArray& p_b) {
+	int vec4_size = p_b.size()/(4 * sizeof(real_t));
+	PackedVector3Array result;
+	result.resize(vec4_size);
+	const uint8_t* r = p_b.ptr();
+	for (int idx_base = 0; idx_base < vec4_size; idx_base += 1) {
+		Vector3 v;
+		v.x = *(real_t*)(r + (idx_base * 4 * sizeof(real_t)) + 0);
+		v.y = *(real_t*)(r + (idx_base * 4 * sizeof(real_t)) + sizeof(real_t) * 1);
+		v.z = *(real_t*)(r + (idx_base * 4 * sizeof(real_t)) + sizeof(real_t) * 2);
+		result.set(idx_base,v);
+	}
+	return result;
+}
+
 #ifdef DEBUG_METHODS_ENABLED
 #define VCALLR *ret = p_func(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...)
 #define VCALL p_func(VariantCasterAndValidate<P>::cast(p_args, Is, r_error)...)
@@ -1855,6 +1870,7 @@ void Variant::_register_variant_utility_functions() {
 	FUNCBINDR(rid_from_int64, sarray("base"), Variant::UTILITY_FUNC_TYPE_GENERAL);
 
 	FUNCBINDR(is_same, sarray("a", "b"), Variant::UTILITY_FUNC_TYPE_GENERAL);
+	FUNCBINDR(decode_vec3in4, sarray("bytes"), Variant::UTILITY_FUNC_TYPE_GENERAL);
 }
 
 void Variant::_unregister_variant_utility_functions() {

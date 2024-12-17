@@ -153,6 +153,7 @@ struct VariantUtilityFunctions {
 	static uint64_t rid_allocate_id();
 	static RID rid_from_int64(uint64_t p_base);
 	static bool is_same(const Variant &p_a, const Variant &p_b);
+	static PackedVector3Array decode_vec3in4(const PackedByteArray& p_b);
 };
 
 #endif // VARIANT_UTILITY_H
