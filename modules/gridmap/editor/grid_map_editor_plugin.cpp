@@ -376,7 +376,7 @@ Array GridMapEditor::_get_selected_cells() const {
 		for (int i = selection.begin.x; i <= selection.end.x; i++) {
 			for (int j = selection.begin.y; j <= selection.end.y; j++) {
 				for (int k = selection.begin.z; k <= selection.end.z; k++) {
-					Vector3i selected = Vector3i(i, j, k);
+					Vector4i selected = Vector4i(i, j, k, edit_floor[3]);
 					int itm = node->get_cell_item(selected);
 					if (itm == GridMap::INVALID_CELL_ITEM) {
 						continue;
