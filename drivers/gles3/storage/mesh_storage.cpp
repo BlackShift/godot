@@ -595,6 +595,10 @@ RID MeshStorage::mesh_surface_get_material(RID p_mesh, int p_surface) const {
 
 	return mesh->surfaces[p_surface]->material;
 }
+RID MeshStorage::mesh_surface_get_vertex_buffer(RID p_mesh, int p_surface) const {
+	//GDscript has no access to GLES storage buffers
+	return RID();
+}
 
 RS::SurfaceData MeshStorage::mesh_get_surface(RID p_mesh, int p_surface) const {
 	Mesh *mesh = mesh_owner.get_or_null(p_mesh);

@@ -1368,15 +1368,6 @@ void GridMapEditor::_bind_methods() {
 }
 
 GridMapEditor::GridMapEditor() {
-<<<<<<< HEAD
-	ED_SHORTCUT("grid_map/previous_floor", TTRC("Previous Floor"), Key::KEY_1, true);
-	ED_SHORTCUT("grid_map/next_floor", TTRC("Next Floor"), Key::KEY_3, true);
-	ED_SHORTCUT("grid_map/edit_x_axis", TTRC("Edit X Axis"), KeyModifierMask::SHIFT + Key::Z, true);
-	ED_SHORTCUT("grid_map/edit_y_axis", TTRC("Edit Y Axis"), KeyModifierMask::SHIFT + Key::X, true);
-	ED_SHORTCUT("grid_map/edit_z_axis", TTRC("Edit Z Axis"), KeyModifierMask::SHIFT + Key::C, true);
-	ED_SHORTCUT("grid_map/keep_selected", TTRC("Keep Selection"));
-	ED_SHORTCUT("grid_map/clear_rotation", TTRC("Clear Rotation"));
-=======
 	ED_SHORTCUT("grid_map/previous_floor", TTR("Previous Floor"), Key::KEY_1, true);
 	ED_SHORTCUT("grid_map/next_floor", TTR("Next Floor"), Key::KEY_3, true);
 	ED_SHORTCUT("grid_map/next_layer", TTR("Previous Layer"), KeyModifierMask::SHIFT + Key::Q, true);
@@ -1386,7 +1377,6 @@ GridMapEditor::GridMapEditor() {
 	ED_SHORTCUT("grid_map/edit_z_axis", TTR("Edit Z Axis"), KeyModifierMask::SHIFT + Key::C, true);
 	ED_SHORTCUT("grid_map/keep_selected", TTR("Keep Selection"));
 	ED_SHORTCUT("grid_map/clear_rotation", TTR("Clear Rotation"));
->>>>>>> 583b6fe2bb (Allow editing layers in GridMapEditor)
 
 	options = memnew(MenuButton);
 	options->set_theme_type_variation(SceneStringName(FlatButton));
